@@ -12,7 +12,7 @@ module.exports.uploadImage = async (req, res) => {
         const path = 'public/images/' + datePrefix + '.png';
 
         //change url when app gets deployed to production environment
-        user.imageUrl = `https://85fd8478.ngrok.io/images/${datePrefix}.png`;
+        user.imageUrl = `https://e0b0550d.ngrok.io/images/${datePrefix}.png`;
 
         const imgdata = req.body.base64Image;
         const base64Data = imgdata.replace(/^data:([A-Za-z-+/]+);base64,/, '');
@@ -44,6 +44,38 @@ module.exports.getUserById = async (req, res) => {
         return res.status(200).json({ userData });
 
     } catch (e) {
+        return res.status(500).json({
+            message: 'An error occured while trying to get user data!',
+            error: e
+        });
+    }
+}
+
+module.exports.setPlayerId = async (req, res) => {
+    const userId = getUserIdFromToken(req.headers['token']);
+    const playerId = req.headers['playerid'];
+
+    try {
+        const user = await User.findOne({ _id: userId });
+        user.playerId = playerId;
+
+        await user.save();
+
+        const userData = {
+            id: user._id,
+            imageUrl: user.imageUrl,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+            playerId: playerId
+        };
+
+        return res.status(200).json({
+            message: 'Success',
+            userData
+        });
+    } catch (e) {
+        console.log(e);
         return res.status(500).json({
             message: 'An error occured while trying to get user data!',
             error: e
